@@ -3,9 +3,8 @@ import { UploadZone } from "@/components/UploadZone";
 import { MetricCards } from "@/components/MetricCards";
 import { LeaksTable } from "@/components/LeaksTable";
 import { AuditReport } from "@/components/AuditReport";
-import { Button } from "@/components/ui/button";
 import { useSimulateDemoData, useRunAiAudit, type AnalysisResult } from "@workspace/api-client-react";
-import { Terminal, Cpu, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
 export default function Dashboard() {
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
@@ -46,27 +45,47 @@ export default function Dashboard() {
     );
   };
 
+  const handleReset = () => {
+    setAnalysis(null);
+    setReport(null);
+  };
+
   return (
-    <div className="min-h-screen p-6 md:p-8 lg:max-w-[1400px] lg:mx-auto space-y-8">
-      <header className="flex items-center justify-between border-b border-border pb-6 animate-in fade-in slide-in-from-top-4 duration-500">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-primary/10 border border-primary text-primary flex items-center justify-center">
-            <Terminal size={24} />
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="border-b border-white/[0.07] px-8 md:px-16 lg:px-24">
+        <div className="max-w-5xl mx-auto h-16 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <span className="text-[15px] font-semibold text-foreground tracking-[-0.02em]">CloudDrain</span>
+            <span className="text-[15px] font-light text-muted-foreground tracking-[-0.01em]">AI</span>
           </div>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-primary uppercase">CloudDrain<span className="text-foreground">.AI</span></h1>
-            <p className="text-xs text-muted-foreground uppercase tracking-widest font-sans">Automated AWS Cost Intelligence</p>
+          <div className="flex items-center gap-2">
+            <span className="w-[6px] h-[6px] rounded-full bg-white/30" />
+            {analysis && (
+              <button
+                onClick={handleReset}
+                className="text-xs text-muted-foreground hover:text-foreground transition-colors ml-4"
+              >
+                New analysis
+              </button>
+            )}
           </div>
-        </div>
-        <div className="hidden sm:flex items-center gap-2 text-xs font-mono">
-          <span className="w-2 h-2 rounded-full bg-primary animate-pulse shadow-[0_0_8px_hsl(var(--primary))]"></span>
-          <span className="text-primary">SYSTEM ONLINE</span>
         </div>
       </header>
 
-      <main className="space-y-8">
+      <main className="max-w-5xl mx-auto px-8 md:px-16 lg:px-24">
         {!analysis ? (
-          <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 delay-150 fill-mode-both">
+          /* Landing / Upload state */
+          <div className="animate-in fade-in duration-500">
+            <div className="pt-24 pb-16">
+              <h1 className="text-4xl font-light text-foreground tracking-[-0.03em] leading-tight mb-3">
+                Cut your AWS bill.
+              </h1>
+              <p className="text-base text-muted-foreground font-light leading-relaxed max-w-md">
+                Upload a Cost and Usage Report to detect cloud waste — idle compute, orphaned storage, and unused GPU instances.
+              </p>
+            </div>
+
             <UploadZone
               onUploadSuccess={handleUploadSuccess}
               onSimulate={handleSimulate}
@@ -74,36 +93,45 @@ export default function Dashboard() {
             />
           </div>
         ) : (
-          <div className="space-y-8 animate-in fade-in zoom-in-95 duration-500">
+          /* Dashboard state */
+          <div className="py-16 space-y-16 animate-in fade-in duration-500">
+            {/* Metrics */}
             <MetricCards analysis={analysis} />
 
-            <div className="space-y-4">
+            {/* Leaks section */}
+            <div className="space-y-6">
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
-                  <Cpu className="text-destructive w-5 h-5" />
-                  DETECTED CLOUD LEAKS
-                </h2>
-                <Button
+                <div>
+                  <h2 className="text-[13px] font-medium text-muted-foreground uppercase tracking-widest">
+                    Detected leaks
+                  </h2>
+                  <p className="text-sm text-muted-foreground/60 mt-0.5">
+                    {analysis.leaks.length} resource{analysis.leaks.length !== 1 ? "s" : ""} flagged
+                  </p>
+                </div>
+
+                <button
                   onClick={handleRunAudit}
                   disabled={auditMutation.isPending || analysis.leaks.length === 0}
-                  className="bg-primary text-primary-foreground hover:bg-primary/90 font-bold uppercase tracking-wider rounded-none border-b-2 border-primary-foreground/50 active:border-b-0 active:translate-y-[2px] transition-all"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium bg-white text-black hover:bg-white/90 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-150"
                 >
                   {auditMutation.isPending ? (
                     <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Auditing Systems...
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      Generating audit...
                     </>
                   ) : (
-                    "Run AI Optimization Audit"
+                    "Run AI Audit"
                   )}
-                </Button>
+                </button>
               </div>
 
               <LeaksTable leaks={analysis.leaks} />
             </div>
 
+            {/* Audit report */}
             {report && (
-              <div className="pt-8 border-t border-border animate-in slide-in-from-bottom-8 fade-in duration-700">
+              <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <AuditReport report={report} />
               </div>
             )}
