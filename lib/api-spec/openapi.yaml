@@ -3,13 +3,15 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: CloudDrain AI - AWS Cost Optimization API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: finops
+    description: FinOps analysis operations
 paths:
   /healthz:
     get:
@@ -24,6 +26,67 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /finops/simulate:
+    post:
+      operationId: simulateDemoData
+      tags: [finops]
+      summary: Generate demo AWS billing data
+      description: Generates a realistic mock AWS Cost and Usage Report and runs anomaly detection on it
+      responses:
+        "200":
+          description: Demo analysis result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AnalysisResult"
+
+  /finops/upload:
+    post:
+      operationId: uploadCsvReport
+      tags: [finops]
+      summary: Upload AWS CUR CSV file
+      description: Accepts an AWS Cost and Usage Report CSV file (multipart/form-data with field 'file'), parses it, and runs anomaly detection
+      responses:
+        "200":
+          description: Analysis result from uploaded CSV
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AnalysisResult"
+        "400":
+          description: Invalid or missing CSV file
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /finops/audit:
+    post:
+      operationId: runAiAudit
+      tags: [finops]
+      summary: Run AI optimization audit
+      description: Passes detected leak data to an LLM and returns a structured Markdown report with actionable remediation steps
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AuditInput"
+      responses:
+        "200":
+          description: AI-generated audit report
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuditResult"
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +97,90 @@ components:
       required:
         - status
 
+    LeakRecord:
+      type: object
+      required:
+        - resourceId
+        - region
+        - leakType
+        - monthlyWaste
+        - details
+      properties:
+        resourceId:
+          type: string
+          description: AWS Resource ID (e.g. i-0abc123, vol-0xyz456)
+        region:
+          type: string
+          description: AWS region (e.g. us-east-1)
+        leakType:
+          type: string
+          enum:
+            - UNDERUTILIZED_COMPUTE
+            - ORPHANED_STORAGE
+            - WASTEFUL_GPU
+          description: Category of cloud waste leak
+        monthlyWaste:
+          type: number
+          description: Estimated monthly cost wasted in USD
+        details:
+          type: string
+          description: Human-readable description of the issue
+
+    AnalysisResult:
+      type: object
+      required:
+        - totalMonthlySpend
+        - potentialSavings
+        - efficiencyScore
+        - leaks
+        - resourceCount
+      properties:
+        totalMonthlySpend:
+          type: number
+          description: Total monthly AWS spend in USD
+        potentialSavings:
+          type: number
+          description: Potential monthly savings in USD
+        efficiencyScore:
+          type: number
+          description: Cloud waste efficiency score 0-100 (100 = perfectly efficient)
+        leaks:
+          type: array
+          items:
+            $ref: "#/components/schemas/LeakRecord"
+        resourceCount:
+          type: integer
+          description: Total number of resources scanned
+
+    AuditInput:
+      type: object
+      required:
+        - leaks
+        - totalMonthlySpend
+        - potentialSavings
+      properties:
+        leaks:
+          type: array
+          items:
+            $ref: "#/components/schemas/LeakRecord"
+        totalMonthlySpend:
+          type: number
+        potentialSavings:
+          type: number
+
+    AuditResult:
+      type: object
+      required:
+        - report
+      properties:
+        report:
+          type: string
+          description: AI-generated Markdown report with remediation steps
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string

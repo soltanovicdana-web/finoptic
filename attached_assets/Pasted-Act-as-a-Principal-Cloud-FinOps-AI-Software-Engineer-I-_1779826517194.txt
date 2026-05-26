@@ -1,0 +1,35 @@
+Act as a Principal Cloud FinOps & AI Software Engineer. I want you to build a production-ready, full-stack web application called "CloudDrain AI". This tool helps US tech startups drastically cut their AWS hosting costs by using smart data filtering and LLM insights.
+
+Please build the application using Python (FastAPI/Flask) for the backend and React with Tailwind CSS for the frontend. Use a sleek, premium dark-mode "Hacker/Cyberpunk" aesthetic.
+
+Here is the exact structural specification you must follow:
+
+1. FILE UPLOAD & PARSING (Backend):
+- Create a secure file upload zone that accepts AWS Cost and Usage Report (CUR) CSV files.
+- Use Python with Pandas to automatically parse the uploaded CSV file.
+- Since real AWS CUR files are massive, implement efficient chunk-based processing to prevent memory crashes.
+- Create a built-in "Simulate Demo Data" button that generates a mock AWS billing CSV file with realistic infrastructure costs if the user doesn't have their own file handy.
+
+2. FINOPS ANOMALY DETECTION ENGINE (Backend Logic):
+The Python engine must scan the CSV records and catch 3 specific cloud budget leaks based on strict logic:
+- Underutilized Compute (EC2): Look for instances costing >$200/month where average CPU Utilization is <5%.
+- Orphaned Storage (Detached EBS Volumes): Look for storage blocks with volume status set to "available" (meaning they are unattached to any server but still billing hourly).
+- Wasteful AI Inference (Idle GPU Instances): Look for p3/p4/g5 active instances running with 0% active workload tensor core utilization.
+
+3. WEB DASHBOARD USER INTERFACE (Frontend):
+- Build a beautiful, interactive dashboard with an executive financial overview.
+- Include visual metrics: "Current Monthly Spend ($)", "Potential Savings ($)", and a "Cloud Waste Efficiency Score (%)".
+- Display the detected leaks in clean, filterable interactive tables (showing Resource ID, Region, Monthly Waste Amount, and Leak Type).
+- Include a big prominent "Run AI Optimization Audit" button.
+
+4. AI INTERPRETER INTEGRATION (LLM API):
+- When the user clicks "Run AI Optimization Audit", pass the pre-filtered JSON data of detected leaks into an LLM API (Use Google Gemini API or OpenAI API via lightweight models).
+- Write a rock-solid, strict system prompt for the LLM to behave as a ruthless Wall Street CFO combined with a Principal AWS Architect.
+- The LLM must generate a highly actionable, structured Markdown text report for US Startup CTOs. It must contain concrete step-by-step instructions (e.g., specific AWS CLI commands to delete orphaned volumes or switch instance types) and state exact dollar amounts saved.
+- Display this generated Markdown report in a beautiful reader component on the UI with a "Copy Report" button.
+
+5. ENTERPRISE REPO STRUCTURE & VIRAL README:
+- Ensure the codebase is clean, modular, and separated into frontend/backend folders.
+- Create a world-class, viral GitHub README.md file in the root directory. It must feature bold headers, explain the financial impact of the tool (saving up to 30% on AWS), contain step-by-step installation instructions for local execution on a MacBook, and look incredibly professional.
+
+Begin step-by-step. Build the backend parser and simulation engine first, then move to the frontend dashboard, and finally wire up the AI connector. Test for any code exceptions autonomously.
