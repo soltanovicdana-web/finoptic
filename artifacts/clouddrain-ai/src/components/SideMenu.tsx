@@ -63,7 +63,7 @@ export function SideMenu({ open, onClose }: SideMenuProps) {
           {/* GitHub */}
           <div className="space-y-1">
             <a
-              href="https://github.com"
+              href="https://github.com/soltanovicdana-web/finoptic"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2.5 text-[14px] font-medium text-white/80 hover:text-white transition-colors duration-150 group"
