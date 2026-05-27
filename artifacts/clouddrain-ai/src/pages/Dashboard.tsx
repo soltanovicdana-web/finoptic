@@ -63,8 +63,8 @@ export default function Dashboard() {
       <header className="border-b border-white/[0.07] px-8 md:px-16 lg:px-24">
         <div className="max-w-5xl mx-auto h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <span className="text-[15px] font-semibold text-foreground tracking-[-0.02em]">CloudDrain</span>
-            <span className="text-[15px] font-light text-muted-foreground tracking-[-0.01em]">AI</span>
+            <span className="text-[15px] font-semibold text-foreground tracking-[-0.02em]">Fin</span>
+            <span className="text-[15px] font-light text-muted-foreground tracking-[-0.01em]">Optic</span>
           </div>
           <div className="flex items-center gap-2">
             <span className="w-[6px] h-[6px] rounded-full bg-white/25" />

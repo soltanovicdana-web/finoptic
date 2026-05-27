@@ -1,6 +1,6 @@
-# [Project name]
+# FinOptic
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+FinOptic is an automated AWS cost optimization engine that parses Cost & Usage Report CSVs to detect cloud waste and generate AI-written remediation reports.
 
 ## Run & Operate
 
