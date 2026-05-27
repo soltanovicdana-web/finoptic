@@ -5,6 +5,7 @@ import { LeaksTable } from "@/components/LeaksTable";
 import { AuditReport } from "@/components/AuditReport";
 import { GhostPreview } from "@/components/GhostPreview";
 import { WasteChart } from "@/components/WasteChart";
+import { SideMenu } from "@/components/SideMenu";
 import { useSimulateDemoData, useRunAiAudit, type AnalysisResult } from "@workspace/api-client-react";
 import { Loader2 } from "lucide-react";
 
@@ -12,6 +13,7 @@ export default function Dashboard() {
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
   const [report, setReport] = useState<string | null>(null);
   const [showReport, setShowReport] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const simulateMutation = useSimulateDemoData();
   const auditMutation = useRunAiAudit();
@@ -65,19 +67,29 @@ export default function Dashboard() {
           <div className="flex items-center">
             <span className="text-[15px] font-semibold text-white tracking-[-0.02em]">FinOptic</span>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="w-[6px] h-[6px] rounded-full bg-white/25" />
+          <div className="flex items-center gap-4">
             {analysis && (
               <button
                 onClick={handleReset}
-                className="text-xs text-muted-foreground hover:text-foreground transition-colors ml-4"
+                className="text-xs text-muted-foreground hover:text-foreground transition-colors"
               >
                 New analysis
               </button>
             )}
+            <button
+              onClick={() => setMenuOpen(true)}
+              aria-label="Open menu"
+              className="flex flex-col justify-center items-center gap-[5px] w-8 h-8 rounded-md hover:bg-white/[0.06] transition-colors duration-150"
+            >
+              <span className="block w-[16px] h-[1px] bg-white/50" />
+              <span className="block w-[16px] h-[1px] bg-white/50" />
+              <span className="block w-[16px] h-[1px] bg-white/50" />
+            </button>
           </div>
         </div>
       </header>
+
+      <SideMenu open={menuOpen} onClose={() => setMenuOpen(false)} />
 
       <main className="max-w-5xl mx-auto px-8 md:px-16 lg:px-24">
 
