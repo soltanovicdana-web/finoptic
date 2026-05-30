@@ -6,14 +6,18 @@ import { AuditReport } from "@/components/AuditReport";
 import { GhostPreview } from "@/components/GhostPreview";
 import { WasteChart } from "@/components/WasteChart";
 import { SideMenu } from "@/components/SideMenu";
+import { LiveSyncForm } from "@/components/LiveSyncForm";
 import { useSimulateDemoData, useRunAiAudit, type AnalysisResult } from "@workspace/api-client-react";
 import { Loader2 } from "lucide-react";
+
+type InputMode = "csv" | "live";
 
 export default function Dashboard() {
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
   const [report, setReport] = useState<string | null>(null);
   const [showReport, setShowReport] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [mode, setMode] = useState<InputMode>("csv");
 
   const simulateMutation = useSimulateDemoData();
   const auditMutation = useRunAiAudit();
@@ -28,7 +32,7 @@ export default function Dashboard() {
     });
   };
 
-  const handleUploadSuccess = (data: AnalysisResult) => {
+  const handleAnalysisReady = (data: AnalysisResult) => {
     setAnalysis(data);
     setReport(null);
     setShowReport(false);
@@ -93,43 +97,80 @@ export default function Dashboard() {
 
       <main className="max-w-5xl mx-auto px-8 md:px-16 lg:px-24">
 
-        {/* ── EMPTY STATE: upload + ghost preview ── */}
+        {/* ── EMPTY STATE ── */}
         {!analysis && (
           <div className="animate-in fade-in duration-500">
-            <div className="pt-20 pb-12">
+            <div className="pt-20 pb-10">
               <h1 className="text-4xl font-light text-foreground tracking-[-0.03em] leading-tight mb-3">
                 Cut your AWS bill.
               </h1>
               <p className="text-base text-muted-foreground font-light leading-relaxed max-w-md">
-                Upload a Cost and Usage Report to detect cloud waste — idle compute,
-                orphaned storage, and unused GPU instances.
+                {mode === "csv"
+                  ? "Upload a Cost and Usage Report to detect cloud waste — idle compute, orphaned storage, and unused GPU instances."
+                  : "Connect a read-only IAM role and pull live Cost Explorer + CloudWatch data directly from your AWS account."}
               </p>
             </div>
 
-            <UploadZone
-              onUploadSuccess={handleUploadSuccess}
-              onSimulate={handleSimulate}
-              isSimulating={simulateMutation.isPending}
-            />
+            {/* Mode toggle */}
+            <div className="flex items-center gap-0 mb-8 border-b border-white/[0.07]">
+              <button
+                onClick={() => setMode("csv")}
+                className={`relative pb-3 pr-6 text-[13px] font-medium transition-colors duration-150 ${
+                  mode === "csv" ? "text-white" : "text-white/35 hover:text-white/60"
+                }`}
+              >
+                Upload CSV
+                {mode === "csv" && (
+                  <span className="absolute bottom-[-1px] left-0 right-6 h-[1px] bg-white" />
+                )}
+              </button>
+              <button
+                onClick={() => setMode("live")}
+                className={`relative pb-3 px-6 text-[13px] font-medium transition-colors duration-150 flex items-center gap-2 ${
+                  mode === "live" ? "text-white" : "text-white/35 hover:text-white/60"
+                }`}
+              >
+                <span
+                  className={`w-[6px] h-[6px] rounded-full transition-colors duration-150 ${
+                    mode === "live" ? "bg-emerald-400" : "bg-white/20"
+                  }`}
+                />
+                Live AWS Sync
+                {mode === "live" && (
+                  <span className="absolute bottom-[-1px] left-0 right-6 h-[1px] bg-white" />
+                )}
+              </button>
+            </div>
 
-            {/* Ghost preview of what the dashboard will look like */}
-            <GhostPreview />
+            {/* CSV / Simulate mode */}
+            {mode === "csv" && (
+              <>
+                <UploadZone
+                  onUploadSuccess={handleAnalysisReady}
+                  onSimulate={handleSimulate}
+                  isSimulating={simulateMutation.isPending}
+                />
+                <GhostPreview />
+              </>
+            )}
+
+            {/* Live AWS Sync mode */}
+            {mode === "live" && (
+              <LiveSyncForm onSuccess={handleAnalysisReady} />
+            )}
           </div>
         )}
 
-        {/* ── LOADED STATE: live dashboard ── */}
+        {/* ── LOADED STATE ── */}
         {analysis && (
           <div className="py-16 space-y-14 animate-in fade-in duration-600">
 
-            {/* Metric cards */}
             <MetricCards analysis={analysis} />
 
-            {/* Cumulative waste chart */}
             <div className="pt-2">
               <WasteChart monthlyWaste={analysis.potentialSavings} />
             </div>
 
-            {/* Detected leaks section */}
             <div className="space-y-6 pt-2 border-t border-white/[0.06]">
               <div className="flex items-start justify-between pt-6">
                 <div>
@@ -160,7 +201,6 @@ export default function Dashboard() {
               <LeaksTable leaks={analysis.leaks} />
             </div>
 
-            {/* Audit report reader — slides in below the table */}
             {showReport && report && (
               <div className="animate-in fade-in slide-in-from-bottom-6 duration-600 pt-2 border-t border-white/[0.06]">
                 <AuditReport

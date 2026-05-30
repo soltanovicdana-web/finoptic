@@ -1,0 +1,2 @@
+- [Zod in api-server](zod-api-server.md) — must add `"zod": "catalog:"` as direct dep; import from `"zod"` not `"zod/v4"`
+- [Live AWS sync pipeline](aws-live-sync.md) — STS → Cost Explorer → CloudWatch flow, fallback patterns, NormalizedRow mapping

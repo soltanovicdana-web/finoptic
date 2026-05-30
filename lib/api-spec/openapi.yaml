@@ -61,6 +61,44 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
+  /finops/live:
+    post:
+      operationId: liveAwsSync
+      tags: [finops]
+      summary: Pull live AWS costs and utilization
+      description: Assumes a cross-account IAM role via STS, fetches the last 30 days of Cost Explorer costs and CloudWatch CPU metrics, then runs FinOptic waste detection on real infrastructure data.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AwsLiveInput"
+      responses:
+        "200":
+          description: Live AWS analysis result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AnalysisResult"
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LiveSyncError"
+        "403":
+          description: IAM access denied or insufficient permissions
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LiveSyncError"
+        "500":
+          description: AWS API error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LiveSyncError"
+
   /finops/audit:
     post:
       operationId: runAiAudit
@@ -176,6 +214,38 @@ components:
         report:
           type: string
           description: AI-generated Markdown report with remediation steps
+
+    AwsLiveInput:
+      type: object
+      required:
+        - roleArn
+        - externalId
+      properties:
+        accountId:
+          type: string
+          description: AWS Account ID (12 digits) — optional, used for display only
+        roleArn:
+          type: string
+          description: "IAM Role ARN for cross-account access — format: arn:aws:iam::ACCOUNT_ID:role/ROLE_NAME"
+        externalId:
+          type: string
+          description: External ID that matches the IAM role trust policy (security handshake)
+
+    LiveSyncError:
+      type: object
+      required:
+        - error
+        - code
+      properties:
+        error:
+          type: string
+          description: Human-readable error message
+        code:
+          type: string
+          description: "Machine-readable error code: ACCESS_DENIED | THROTTLED | INVALID_ARN | AWS_ERROR | INVALID_INPUT | INTERNAL_ERROR"
+        remediation:
+          type: ["string", "null"]
+          description: Step-by-step instructions for fixing the IAM policy or configuration
 
     ErrorResponse:
       type: object
